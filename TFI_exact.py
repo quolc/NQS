@@ -24,7 +24,6 @@ class TFI_exact:
 
         # number of all parameters
         state = np.zeros((2**self.N,), dtype=np.complex) # |psi>
-        w_n = self.N + self.M + self.N * self.M
 
         # construct Hamiltonian H
         H = np.zeros((2**self.N, 2**self.N), dtype=np.complex)
@@ -46,7 +45,7 @@ class TFI_exact:
         #print(H)
 
         # {O_k|psi>} (k=1...w_n)
-        Opsi = np.zeros((2**self.N, w_n), dtype=np.complex)
+        Opsi = np.zeros((2**self.N, self.N + self.M + self.N * self.M), dtype=np.complex)
 
         # calculate vector representation of the state
         for i_s in range(0, 2**self.N):
