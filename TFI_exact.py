@@ -15,7 +15,7 @@ class TFI_exact:
 
     def calcsf(self, a, b, w):
         """
-        calculate (S, F) for a wave function given as (a, b, W)
+        calculate (S, F) for a wave function given as (a, b, W) by exact calculation
         :param a: bias for visible units
         :param b: bias for hidden units
         :param w: interaction coefficients, w[i,j] represents interaction btw. v_i and h_j
@@ -72,18 +72,25 @@ class TFI_exact:
         EOave = np.dot(Hpsi, np.conj(Opsi)) / amp
         F = EOave - Eave * np.conj(Oave)
 
+        # debug
+        print('wave function (exact):')
+        print(np.real(np.conj(state) * state / amp))
+        print()
+
         return (S, F)
 
 
 if __name__ == "__main__":
     # debug
-    tfi_exact = TFI_exact(N=4, alpha=1, h=1)
+    tfi_exact = TFI_exact(N=4, alpha=1, h=10)
     a = np.array([1+1j, 1+1j, 1+1j, 1+1j])
     b = np.array([1+1j, 1+1j, 1+1j, 1+1j])
+    # a = np.array([0, 0, 0, 0])
+    # b = np.array([0, 0, 0, 0])
     w = np.array([[1+1j, 1+1j, 1+1j, 1+1j],
                   [1+1j, 1+1j, 1+1j, 1+1j],
                   [1+1j, 1+1j, 1+1j, 1+1j],
-                  [1+1j, 1+1j, 1+1j, 1+1j],])
+                  [1+1j, 1+1j, 1+1j, 1+1j],]) * 0.01
     s, f = tfi_exact.calcsf(a, b, w)
-    print(s)
-    print(f)
+    # print(s)
+    # print(f)
