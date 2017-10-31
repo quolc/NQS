@@ -42,7 +42,6 @@ class TFI_exact:
             z_factors[(i+1)%self.N] = sz
             z_term = reduce(np.kron, z_factors)
             H += (-z_term)
-        #print(H)
 
         # {O_k|psi>} (k=1...w_n)
         Opsi = np.zeros((2**self.N, self.N + self.M + self.N * self.M), dtype=np.complex)
@@ -73,11 +72,11 @@ class TFI_exact:
         F = EOave - Eave * np.conj(Oave)
 
         # debug
-        print('wave function (exact):')
-        print(np.real(np.conj(state) * state / amp))
-        print()
+        # print('wave function (exact):')
+        # print(np.real(np.conj(state) * state / amp))
+        # print()
 
-        return (S, F)
+        return (S, F, Eave)
 
 
 if __name__ == "__main__":
@@ -91,6 +90,6 @@ if __name__ == "__main__":
                   [1+1j, 1+1j, 1+1j, 1+1j],
                   [1+1j, 1+1j, 1+1j, 1+1j],
                   [1+1j, 1+1j, 1+1j, 1+1j],]) * 0.01
-    s, f = tfi_exact.calcsf(a, b, w)
+    s, f, _ = tfi_exact.calcsf(a, b, w)
     # print(s)
     # print(f)

@@ -1,6 +1,5 @@
 import random
 import numpy as np
-from functools import reduce
 
 class TFI_MCMC:
 
@@ -92,9 +91,9 @@ class TFI_MCMC:
         F = EOave - Eave * np.conj(Oave)
 
         # debug
-        print("wave function (MCMC)")
-        print(wf) # wave function (amplitude)
-        print()
+        # print("wave function (MCMC)")
+        # print(wf) # wave function (amplitude)
+        # print()
 
         return (S, F)
 
