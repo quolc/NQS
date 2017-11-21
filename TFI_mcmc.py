@@ -16,6 +16,9 @@ class TFI_MCMC:
         if seed is not None:
             random.seed(seed)
 
+        # random initialization of spins only in the constructor
+        self.s = np.array([random.randint(0, 1)*2-1 for _ in range(self.N)], dtype=np.float32)
+
     def calcsf(self, a, b, w):
         """
         calculate (S, F) for a wave function given as (a, b, W) by MCMC
@@ -26,9 +29,8 @@ class TFI_MCMC:
         """
 
         # initialize by random configuration
-        s = np.array([random.randint(0, 1)*2-1 for _ in range(self.N)], dtype=np.float32)
-        theta = b + np.dot(s, w)
-        exp_factor = np.exp(np.dot(a, s))
+        theta = b + np.dot(self.s, w)
+        exp_factor = np.exp(np.dot(a, self.s))
         cos_factor = np.prod(2 * np.cosh(theta))
 
         n_w = self.N + self.M + self.N * self.M
@@ -43,41 +45,41 @@ class TFI_MCMC:
         # stochastic sampling
         for _ in range(self.samples):
             # sampling physical quantities
-            Oa = np.array(s)
+            Oa = np.array(self.s)
             Ob = np.tanh(theta)
-            Ow = np.outer(s, np.tanh(theta))
+            Ow = np.outer(self.s, np.tanh(theta))
             O = np.concatenate((Oa, Ob, np.ndarray.flatten(Ow)))
 
-            # calculate local energy
+            # calculate local energy <S|H|psi> / psi (H = -h \sum_i sx_i - \sum_ij sz_i sz_j)
             E = 0
             for i in range(self.N):
-                new_theta = theta - 2 * w[i] * s[i]
-                new_exp_factor = exp_factor * np.exp(-2*a[i] * s[i])
+                new_theta = theta - 2 * w[i] * self.s[i]
+                new_exp_factor = exp_factor * np.exp(-2*a[i] * self.s[i])
                 new_cos_factor = np.prod(2 * np.cosh(new_theta))
                 E += (-self.h * (new_exp_factor * new_cos_factor) / (exp_factor * cos_factor))
-                E += (-s[i]*s[(i + 1) % self.N])
+                E += (-self.s[i] * self.s[(i + 1) % self.N])
 
             Oave += O
             OOave += np.outer(np.conj(O), O)
             Eave += E
             EOave += E * np.conj(O)
 
-            # debug
-            i_s = 0
-            for i in range(self.N):
-                i_s += 2**i * (s[i]+1)/2
-            wf[int(i_s)] += 1.0/self.samples
+            # debug : wave function sampling
+            # i_s = 0
+            # for i in range(self.N):
+            #     i_s += 2**i * (self.s[i]+1)/2
+            # wf[int(i_s)] += 1.0/self.samples
 
             # Metropolis-Hastings update
             for _ in range(self.N): # max N flip per a Monte Carlo sweep
                 flip_at = random.randint(0, self.N-1)
-                new_theta = theta - 2*w[flip_at] * s[flip_at]
-                new_exp_factor = exp_factor * np.exp(-2*a[flip_at] * s[flip_at])
+                new_theta = theta - 2 * w[flip_at] * self.s[flip_at]
+                new_exp_factor = exp_factor * np.exp(-2 * a[flip_at] * self.s[flip_at])
                 new_cos_factor = np.prod(2 * np.cosh(new_theta)) # O(M)
                 prob = min(1, abs((new_exp_factor * new_cos_factor) / (exp_factor * cos_factor)) ** 2)
 
                 if random.random() < prob:
-                    s[flip_at] *= -1
+                    self.s[flip_at] *= -1
                     theta = new_theta
                     exp_factor = new_exp_factor
                     cos_factor = new_cos_factor
@@ -95,7 +97,7 @@ class TFI_MCMC:
         # print(wf) # wave function (amplitude)
         # print()
 
-        return (S, F)
+        return (S, F, Eave)
 
 
 if __name__ == "__main__":

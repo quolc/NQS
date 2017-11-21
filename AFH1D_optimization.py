@@ -1,10 +1,10 @@
 import numpy as np
-import TFI_mcmc, TFI_exact
+import AFH1D_exact
 import sys
 
-def optimization(N, alpha, h, iteration):
-    tfi_exact = TFI_exact.TFI_exact(N, alpha, h)
-    tfi_mcmc = TFI_mcmc.TFI_MCMC(N, alpha, h, samples=1000)
+def optimization(N, alpha, j, iteration):
+    afh1d_exact = AFH1D_exact.AFH1D_exact(N, alpha, j)
+#    tfi_mcmc = TFI_mcmc.TFI_MCMC(N, alpha, h, samples=1000)
 
     # initialize by random
     init_range = 0.1
@@ -25,9 +25,9 @@ def optimization(N, alpha, h, iteration):
     mat_delta = np.diag([1] * s_dim) # kronecker delta (identity matrix)
 
     for p in range(1, iteration+1):
-        s, f, eave = tfi_exact.calcsf(a, b, w)
-        # s, f, eave = tfi_mcmc.calcsf(a, b, w)
-        # eave = tfi_exact.calcenergy(a, b, w) # exact calculation of eave
+        s, f, eave = afh1d_exact.calcsf(a, b, w)
+        # s, f = tfi_mcmc.calcsf(a, b, w)
+        # _, _, eave = tfi_exact.calcsf(a, b, w) # exact calculation of eave
 
         # ToDo: currently rank deficience occurs when using explicit regularization
         # lmd = max(100 * (0.9 ** p), 1e-4)
@@ -51,13 +51,13 @@ def optimization(N, alpha, h, iteration):
                                               np.average(np.abs(w_diff))))
 
         # ToDo: what is appropriate value for scaling parameter gamma?
-        gamma = 0.01
+        gamma = 0.005
         a -= gamma * sol[0 : N]
         b -= gamma * sol[N : N + N * alpha]
         dw = np.reshape(-gamma * sol[N + N * alpha :], (N, N * alpha))
         # sudden change of w is detected
         if np.max(np.abs(dw)) > 100:
-            print(sorted(np.reshape(np.abs(s), (s_dim*s_dim,))))
+            # print(sorted(np.reshape(np.abs(s), (s_dim*s_dim,))))
             sys.exit()
         w += dw
     print(a)
@@ -66,4 +66,4 @@ def optimization(N, alpha, h, iteration):
 
 
 if __name__ == "__main__":
-    optimization(N=8, alpha=2, h=1, iteration=2000)
+    optimization(N=8, alpha=4, j=1, iteration=2000)
